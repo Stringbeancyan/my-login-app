@@ -1,18 +1,14 @@
-// Database configuration file (using a simple array for demo purposes)
-const users = [
-    {
-        id: 1,
-        username: 'Stryngbean_cyan',
-        password_hash: '$2y$10$your_hashed_password_here', // Replace with actual hashed password
-        is_admin: true
-    },
-    {
-        id: 2,
-        username: 'Stryngbeancyan',
-        password_hash: '$2y$10$another_hashed_password_here', // Another user
-        is_admin: false
-    }
-];
+// config/db.js
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
-module.exports = { users };
+const db = new sqlite3.Database(path.resolve(__dirname, '../database.db'), (err) => {
+    if (err) {
+        console.error('Error opening database ' + err.message);
+    } else {
+        console.log('Connected to the SQLite database.');
+    }
+});
+
+module.exports = db;
 

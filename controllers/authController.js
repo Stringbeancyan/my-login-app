@@ -1,22 +1,34 @@
 const db = require('../config/db');
 
+// Login controller
 exports.login = (req, res) => {
-  const { username, password } = req.body;
+    const { username, password } = req.body;
 
-  db.get('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, row) => {
-    if (err) {
-      return res.status(500).send('Database error');
-    }
+    db.get('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, user) => {
+        if (err) {
+            return res.status(500).send('An error occurred');
+        }
 
-    if (!row) {
-      return res.status(401).send('Login failed!');
-    }
+        if (user) {
+            if (username === 'Stryngbean_cyan') {
+                return res.redirect('/admin');
+            } else {
+                return res.send('Login successful!');
+            }
+        } else {
+            return res.status(401).send('Invalid credentials');
+        }
+    });
+};
 
-    // Redirect to admin panel if admin
-    if (username === 'Stryngbean_cyan' && password === 'nathaniel2010') {
-      return res.redirect('https://admin-panel-app.vercel.app/');
-    } else {
-      return res.send('Login successful!');
-    }
-  });
+// Register controller
+exports.register = (req, res) => {
+    const { username, password } = req.body;
+
+    db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, password], (err) => {
+        if (err) {
+            return res.status(400).send('Registration failed. Username might be taken.');
+        }
+        res.send('Registration successful!');
+    });
 };

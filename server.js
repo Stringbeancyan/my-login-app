@@ -1,35 +1,51 @@
-// server.js
 const express = require('express');
-const session = require('express-session');
+const path = require('path');
 const bodyParser = require('body-parser');
-const authRoutes = require('./routes/authRoutes');
-const db = require('./config/db'); // Initialize the database connection
+const sqlite3 = require('sqlite3').verbose();
 const app = express();
 
-app.set('view engine', 'ejs'); // Set EJS as the templating engine
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
-    secret: 'yourSecretKey',
-    resave: false,
-    saveUninitialized: false,
-}));
+// Database setup
+const db = new sqlite3.Database('./users.db');
 
-// Admin route
-app.get('/admin', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') {
-        return res.status(403).send('Access denied');
-    }
-    // Fetch all users (or other data) for the admin view
-    db.all('SELECT * FROM users', [], (err, rows) => {
+// Middleware setup
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+
+// Import routes
+const adminRoute = require('./routes/admin');
+
+// Use routes
+app.use('/', adminRoute);
+
+// Serve login page
+app.get('/', (req, res) => {
+    res.render('login');
+});
+
+// Handle login
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    db.get('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, user) => {
         if (err) {
-            return res.status(500).send('Database error');
+            return res.status(500).send('An error occurred');
         }
-        res.render('admin', { data: rows });
+
+        if (user) {
+            if (username === 'Stryngbean_cyan') {
+                return res.redirect('/admin');
+            } else {
+                return res.send('Login successful!');
+            }
+        } else {
+            return res.status(401).send('Invalid credentials');
+        }
     });
 });
 
-app.use('/', authRoutes); // Use the authentication routes
-
-app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000');
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

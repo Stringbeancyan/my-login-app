@@ -6,10 +6,10 @@
         "start": "node server.js"
     },
     "dependencies": {
-        "express": "^4.x",
-        "express-session": "^1.x",
         "body-parser": "^1.x",
         "ejs": "^3.x",
-        "sqlite3": "^5.x"
+        "express": "^4.x",
+        "express-session": "^1.x",
+        "sqlite3": "^5.1.7"
     }
 }

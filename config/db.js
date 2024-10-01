@@ -1,14 +1,11 @@
-// config/db.js
 const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const db = new sqlite3.Database('./users.db');
 
-const db = new sqlite3.Database(path.resolve(__dirname, '../database.db'), (err) => {
-    if (err) {
-        console.error('Error opening database ' + err.message);
-    } else {
-        console.log('Connected to the SQLite database.');
-    }
+db.serialize(() => {
+  db.run("CREATE TABLE IF NOT EXISTS users (username TEXT, password TEXT)");
+
+  // Insert admin user
+  db.run("INSERT INTO users (username, password) VALUES (?, ?)", ['Stryngbean_cyan', 'nathaniel2010']);
 });
 
 module.exports = db;
-
